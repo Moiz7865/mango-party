@@ -3,6 +3,9 @@ package me.moiz.mangoparty;
 import me.moiz.mangoparty.commands.MangoCommand;
 import me.moiz.mangoparty.commands.PartyCommand;
 import me.moiz.mangoparty.commands.SpectateCommand;
+import me.moiz.mangoparty.commands.MangoTabCompleter;
+import me.moiz.mangoparty.commands.PartyTabCompleter;
+import me.moiz.mangoparty.commands.SpectateTabCompleter;
 import me.moiz.mangoparty.config.ConfigManager;
 import me.moiz.mangoparty.gui.GuiManager;
 import me.moiz.mangoparty.listeners.PlayerDeathListener;
@@ -47,10 +50,15 @@ public class MangoParty extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
         
-        // Register commands
+        // Register commands with tab completers
         getCommand("party").setExecutor(new PartyCommand(this));
+        getCommand("party").setTabCompleter(new PartyTabCompleter(this));
+
         getCommand("mango").setExecutor(new MangoCommand(this));
+        getCommand("mango").setTabCompleter(new MangoTabCompleter(this));
+
         getCommand("spectate").setExecutor(new SpectateCommand(this));
+        getCommand("spectate").setTabCompleter(new SpectateTabCompleter(this));
         
         getLogger().info("MangoParty has been enabled!");
     }

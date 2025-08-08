@@ -148,6 +148,26 @@ public class ArenaManager {
             plugin.getLogger().severe("Failed to save arenas.yml: " + e.getMessage());
         }
     }
+
+    public void deleteArena(String name) {
+        arenas.remove(name);
+
+        // Remove from config
+        arenasConfig.set("arenas." + name, null);
+
+        try {
+            arenasConfig.save(arenasFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Failed to save arenas.yml after deletion: " + e.getMessage());
+        }
+
+        // Delete schematic file if it exists
+        File schematicsDir = new File(plugin.getDataFolder(), "schematics");
+        File schematicFile = new File(schematicsDir, name + ".schem");
+        if (schematicFile.exists()) {
+            schematicFile.delete();
+        }
+    }
     
     public boolean saveSchematic(Arena arena) {
         if (arena.getCorner1() == null || arena.getCorner2() == null) {
@@ -182,7 +202,18 @@ public class ArenaManager {
                 ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
                 Operations.complete(copy);
                 
-                ClipboardFormat format = ClipboardFormats.findByFile(schematicFile);
+                File schematicFile = new File(schematicsDir, arena.getName() + ".schem");
+
+                // Use the built-in schematic format
+                ClipboardFormat format = ClipboardFormats.findByAlias("schem");
+                if (format == null) {
+                    format = ClipboardFormats.findByAlias("schematic");
+                }
+                if (format == null) {
+                    plugin.getLogger().severe("No schematic format found! Make sure WorldEdit is properly installed.");
+                    return false;
+                }
+
                 try (ClipboardWriter writer = format.getWriter(new FileOutputStream(schematicFile))) {
                     writer.write(clipboard);
                 }
@@ -206,7 +237,14 @@ public class ArenaManager {
             
             com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(arena.getCenter().getWorld());
             
-            ClipboardFormat format = ClipboardFormats.findByFile(schematicFile);
+            ClipboardFormat format = ClipboardFormats.findByAlias("schem");
+            if (format == null) {
+                format = ClipboardFormats.findByAlias("schematic");
+            }
+            if (format == null) {
+                plugin.getLogger().severe("No schematic format found for reading!");
+                return false;
+            }
             try (ClipboardReader reader = format.getReader(new FileInputStream(schematicFile))) {
                 Clipboard clipboard = reader.read();
                 

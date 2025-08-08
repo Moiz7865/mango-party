@@ -7,6 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
+
 public class MangoCommand implements CommandExecutor {
     private MangoParty plugin;
     
@@ -74,17 +76,23 @@ public class MangoCommand implements CommandExecutor {
         player.sendMessage("§e/mango arena spawn1 <name> §7- Set arena spawn 1");
         player.sendMessage("§e/mango arena spawn2 <name> §7- Set arena spawn 2");
         player.sendMessage("§e/mango arena save <name> §7- Save arena schematic");
+        player.sendMessage("§e/mango arena list §7- List all arenas");
+        player.sendMessage("§e/mango arena delete <name> §7- Delete an arena");
     }
     
     private void handleArenaCommand(Player player, String[] args) {
         String subCommand = args[1].toLowerCase();
         
         if (args.length < 3) {
-            player.sendMessage("§cPlease specify an arena name!");
-            return;
+            if (subCommand.equals("list")) {
+                // Allow /mango arena list without arena name
+            } else {
+                player.sendMessage("§cPlease specify an arena name!");
+                return;
+            }
         }
         
-        String arenaName = args[2];
+        String arenaName = (args.length > 2) ? args[2] : null;
         
         switch (subCommand) {
             case "create":
@@ -107,6 +115,12 @@ public class MangoCommand implements CommandExecutor {
                 break;
             case "save":
                 handleArenaSave(player, arenaName);
+                break;
+            case "list":
+                handleArenaList(player);
+                break;
+            case "delete":
+                handleArenaDelete(player, arenaName);
                 break;
             default:
                 sendArenaHelp(player);
@@ -213,5 +227,31 @@ public class MangoCommand implements CommandExecutor {
         
         plugin.getKitManager().createKit(kitName, player);
         player.sendMessage("§aKit '" + kitName + "' created from your current inventory!");
+    }
+
+    private void handleArenaList(Player player) {
+        Map<String, Arena> arenas = plugin.getArenaManager().getArenas();
+        if (arenas.isEmpty()) {
+            player.sendMessage("§cNo arenas found!");
+            return;
+        }
+        
+        player.sendMessage("§6=== Arena List ===");
+        for (Arena arena : arenas.values()) {
+            String status = arena.isComplete() ? "§aComplete" : "§cIncomplete";
+            player.sendMessage("§e" + arena.getName() + " §7- " + status);
+        }
+    }
+
+    private void handleArenaDelete(Player player, String arenaName) {
+        Arena arena = plugin.getArenaManager().getArena(arenaName);
+        if (arena == null) {
+            player.sendMessage("§cArena not found!");
+            return;
+        }
+        
+        // Remove from manager and config
+        plugin.getArenaManager().deleteArena(arenaName);
+        player.sendMessage("§aArena '" + arenaName + "' deleted!");
     }
 }
