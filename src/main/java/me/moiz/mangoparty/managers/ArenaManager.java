@@ -202,7 +202,7 @@ public class ArenaManager {
                 ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
                 Operations.complete(copy);
                 
-                File schematicFile = new File(schematicsDir, arena.getName() + ".schem");
+                //File schematicFile = new File(schematicsDir, arena.getName() + ".schem");
 
                 // Use the built-in schematic format
                 ClipboardFormat format = ClipboardFormats.findByAlias("schem");
