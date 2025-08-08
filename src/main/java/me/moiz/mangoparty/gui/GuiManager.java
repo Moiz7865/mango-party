@@ -52,6 +52,12 @@ public class GuiManager implements Listener {
         splitConfig = YamlConfiguration.loadConfiguration(splitFile);
         ffaConfig = YamlConfiguration.loadConfiguration(ffaFile);
     }
+
+    // Make this method public so ConfigManager can trigger a reload
+    public void reloadGuiConfigs() {
+        loadGuiConfigs();
+        plugin.getLogger().info("GUI configs reloaded.");
+    }
     
     public void openMatchTypeGui(Player player) {
         Inventory gui = Bukkit.createInventory(null, 9, "§6Select Match Type");
@@ -114,6 +120,8 @@ public class GuiManager implements Listener {
                         
                         item.setItemMeta(meta);
                         gui.setItem(slot, item);
+                    } else {
+                        plugin.getLogger().warning("Kit '" + kitName + "' defined in " + matchType + ".yml but not found in KitManager.");
                     }
                 }
             }

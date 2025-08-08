@@ -2,6 +2,7 @@ package me.moiz.mangoparty.commands;
 
 import me.moiz.mangoparty.MangoParty;
 import me.moiz.mangoparty.models.Arena;
+import me.moiz.mangoparty.models.Kit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -48,7 +49,14 @@ public class MangoCommand implements CommandExecutor {
                 return true;
             }
             handleCreateKitCommand(player, args[2]);
-        } else {
+        } else if (args[0].equalsIgnoreCase("addkitgui")) {
+            if (args.length < 3) {
+                player.sendMessage("§cUsage: /mango addkitgui <kit_name> <match_type> [slot]");
+                return true;
+            }
+            handleAddKitGuiCommand(player, args);
+        }
+        else {
             sendHelpMessage(player);
         }
         
@@ -64,7 +72,10 @@ public class MangoCommand implements CommandExecutor {
         player.sendMessage("§e/mango arena spawn1 <name> §7- Set arena spawn 1");
         player.sendMessage("§e/mango arena spawn2 <name> §7- Set arena spawn 2");
         player.sendMessage("§e/mango arena save <name> §7- Save arena schematic");
+        player.sendMessage("§e/mango arena list §7- List all arenas");
+        player.sendMessage("§e/mango arena delete <name> §7- Delete an arena");
         player.sendMessage("§e/mango create kit <name> §7- Create kit from inventory");
+        player.sendMessage("§e/mango addkitgui <kit_name> <match_type> [slot] §7- Add a kit to a GUI");
     }
     
     private void sendArenaHelp(Player player) {
@@ -253,5 +264,39 @@ public class MangoCommand implements CommandExecutor {
         // Remove from manager and config
         plugin.getArenaManager().deleteArena(arenaName);
         player.sendMessage("§aArena '" + arenaName + "' deleted!");
+    }
+
+    private void handleAddKitGuiCommand(Player player, String[] args) {
+        String kitName = args[1];
+        String matchType = args[2].toLowerCase();
+        Integer slot = null;
+
+        if (args.length > 3) {
+            try {
+                slot = Integer.parseInt(args[3]);
+            } catch (NumberFormatException e) {
+                player.sendMessage("§cInvalid slot number. Must be an integer.");
+                return;
+            }
+        }
+
+        Kit kit = plugin.getKitManager().getKit(kitName);
+        if (kit == null) {
+            player.sendMessage("§cKit '" + kitName + "' not found!");
+            return;
+        }
+
+        if (!matchType.equals("split") && !matchType.equals("ffa")) {
+            player.sendMessage("§cInvalid match type. Must be 'split' or 'ffa'.");
+            return;
+        }
+
+        boolean success = plugin.getConfigManager().addKitToGuiConfig(kit, matchType, slot);
+        if (success) {
+            player.sendMessage("§aKit '" + kitName + "' added to " + matchType.toUpperCase() + " GUI!");
+            plugin.getGuiManager().reloadGuiConfigs(); // Reload GUI to reflect changes
+        } else {
+            player.sendMessage("§cFailed to add kit '" + kitName + "' to " + matchType.toUpperCase() + " GUI. It might already be there or an invalid slot was provided.");
+        }
     }
 }

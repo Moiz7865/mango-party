@@ -30,7 +30,7 @@ public class MangoTabCompleter implements TabCompleter {
         
         if (args.length == 1) {
             // First argument: main commands
-            List<String> commands = Arrays.asList("arena", "create");
+            List<String> commands = Arrays.asList("arena", "create", "addkitgui");
             return commands.stream()
                     .filter(cmd -> cmd.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
@@ -49,6 +49,11 @@ public class MangoTabCompleter implements TabCompleter {
                 return createCommands.stream()
                         .filter(cmd -> cmd.toLowerCase().startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
+            } else if (args[0].equalsIgnoreCase("addkitgui")) {
+                // Suggest existing kit names
+                return plugin.getKitManager().getKits().keySet().stream()
+                        .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
             }
         }
         
@@ -66,6 +71,19 @@ public class MangoTabCompleter implements TabCompleter {
             } else if (args[0].equalsIgnoreCase("create") && args[1].equalsIgnoreCase("kit")) {
                 // Suggest kit name (no specific suggestions, let them type)
                 return Arrays.asList("<kit_name>");
+            } else if (args[0].equalsIgnoreCase("addkitgui")) {
+                // Suggest match types
+                List<String> matchTypes = Arrays.asList("split", "ffa");
+                return matchTypes.stream()
+                        .filter(type -> type.toLowerCase().startsWith(args[2].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("addkitgui")) {
+                // Suggest a placeholder for slot
+                return Arrays.asList("<slot>");
             }
         }
         
