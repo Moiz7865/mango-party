@@ -17,6 +17,10 @@ commands:
     description: MangoParty admin commands
     usage: /mango <arena|create> [args...]
     permission: mangoparty.admin
+  spectate:
+    description: Spectate other players during matches
+    usage: /spectate <player>
+    aliases: [spec]
 
 permissions:
   mangoparty.admin:

@@ -2,6 +2,7 @@ package me.moiz.mangoparty;
 
 import me.moiz.mangoparty.commands.MangoCommand;
 import me.moiz.mangoparty.commands.PartyCommand;
+import me.moiz.mangoparty.commands.SpectateCommand;
 import me.moiz.mangoparty.config.ConfigManager;
 import me.moiz.mangoparty.gui.GuiManager;
 import me.moiz.mangoparty.listeners.PlayerDeathListener;
@@ -49,6 +50,7 @@ public class MangoParty extends JavaPlugin {
         // Register commands
         getCommand("party").setExecutor(new PartyCommand(this));
         getCommand("mango").setExecutor(new MangoCommand(this));
+        getCommand("spectate").setExecutor(new SpectateCommand(this));
         
         getLogger().info("MangoParty has been enabled!");
     }

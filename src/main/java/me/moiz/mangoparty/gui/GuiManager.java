@@ -13,8 +13,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import me.moiz.mangoparty.arena.Arena;
-import me.moiz.mangoparty.party.Party;
+import me.moiz.mangoparty.models.Arena;
+import me.moiz.mangoparty.models.Party;
 
 import java.io.File;
 import java.util.ArrayList;
