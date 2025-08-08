@@ -19,7 +19,7 @@ public class MatchManager {
     private MangoParty plugin;
     private Map<String, Match> activeMatches;
     private Map<UUID, String> playerMatches; // Player UUID -> Match ID
-    private Map<UUID, BukkitTask> countdownTasks;
+    private Map<String, BukkitTask> countdownTasks; // Match ID -> Task
     
     public MatchManager(MangoParty plugin) {
         this.plugin = plugin;

@@ -4,12 +4,14 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
@@ -175,7 +177,10 @@ public class ArenaManager {
             CuboidRegion region = new CuboidRegion(world, min, max);
             
             try (EditSession editSession = WorldEdit.getInstance().newEditSession(world)) {
-                Clipboard clipboard = editSession.lazyCopy(region);
+                // Create clipboard and copy the region
+                BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
+                ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
+                Operations.complete(copy);
                 
                 ClipboardFormat format = ClipboardFormats.findByFile(schematicFile);
                 try (ClipboardWriter writer = format.getWriter(new FileOutputStream(schematicFile))) {
