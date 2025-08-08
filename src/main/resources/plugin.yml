@@ -1,0 +1,27 @@
+name: MangoParty
+version: 1.0.0
+main: me.moiz.mangoparty.MangoParty
+api-version: 1.21
+author: Moiz
+description: A comprehensive party system with arena management and kit system
+website: https://github.com/moiz/mangoparty
+
+depend: [WorldEdit, FastAsyncWorldEdit]
+
+commands:
+  party:
+    description: Party management commands
+    usage: /party <create|invite|join|transfer|leave|disband|match|info>
+    aliases: [p]
+  mango:
+    description: MangoParty admin commands
+    usage: /mango <arena|create> [args...]
+    permission: mangoparty.admin
+
+permissions:
+  mangoparty.admin:
+    description: Access to admin commands
+    default: op
+  mangoparty.use:
+    description: Access to party commands
+    default: true
