@@ -33,8 +33,8 @@ public class PlayerDeathListener implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
         
-        // Store death location for spectator setup
-        Location deathLocation = player.getLocation().clone();
+        // Store death location for spectator setup (make it final)
+        final Location deathLocation = player.getLocation().clone();
         
         // Handle killer if exists
         Player killer = player.getKiller();
@@ -74,28 +74,35 @@ public class PlayerDeathListener implements Listener {
                     
                     // Find a living teammate or opponent to spectate
                     Player spectateTarget = null;
-                    for (Player alive : match.getAllPlayers()) {
-                        if (match.isPlayerAlive(alive.getUniqueId()) && alive.isOnline()) {
-                            spectateTarget = alive;
-                            break;
+                    Match currentMatch = plugin.getMatchManager().getPlayerMatch(player);
+                    if (currentMatch != null) {
+                        for (Player alive : currentMatch.getAllPlayers()) {
+                            if (currentMatch.isPlayerAlive(alive.getUniqueId()) && alive.isOnline()) {
+                                spectateTarget = alive;
+                                break;
+                            }
                         }
                     }
                     
                     if (spectateTarget != null) {
+                        final Player finalSpectateTarget = spectateTarget;
                         // Teleport to spectate target after a short delay
                         new BukkitRunnable() {
                             @Override
                             public void run() {
                                 if (player.isOnline()) {
-                                    player.teleport(spectateTarget.getLocation());
-                                    player.sendMessage("§7Now spectating §e" + spectateTarget.getName() + "§7. Use §e/spectate <player> §7to switch.");
+                                    player.teleport(finalSpectateTarget.getLocation());
+                                    player.sendMessage("§7Now spectating §e" + finalSpectateTarget.getName() + "§7. Use §e/spectate <player> §7to switch.");
                                 }
                             }
                         }.runTaskLater(plugin, 10L); // 0.5 second delay
                     }
                     
                     // Update scoreboard
-                    plugin.getScoreboardManager().updateMatchScoreboards(match);
+                    Match currentMatch2 = plugin.getMatchManager().getPlayerMatch(player);
+                    if (currentMatch2 != null) {
+                        plugin.getScoreboardManager().updateMatchScoreboards(currentMatch2);
+                    }
                 }
             }
         }.runTaskLater(plugin, 5L); // Increased delay to 5 ticks
