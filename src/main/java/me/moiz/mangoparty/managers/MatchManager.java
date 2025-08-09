@@ -56,6 +56,9 @@ public class MatchManager {
             return;
         }
         
+        // Reserve the arena
+        plugin.getArenaManager().reserveArena(arena.getName());
+        
         // Create match object
         String matchId = generateMatchId();
         Match match = new Match(matchId, party, arena, kit, matchType);
@@ -80,6 +83,13 @@ public class MatchManager {
         // Set party as in match
         party.setInMatch(true);
         match.setState(Match.MatchState.PREPARING);
+        
+        // Heal and feed all players
+        for (Player player : players) {
+            player.setHealth(20.0);
+            player.setFoodLevel(20);
+            player.setSaturation(20.0f);
+        }
         
         // Teleport players based on match type
         if ("split".equalsIgnoreCase(matchType)) {
@@ -200,6 +210,9 @@ public class MatchManager {
             }
         }
         
+        // Release the arena
+        plugin.getArenaManager().releaseArena(match.getArena().getName());
+        
         // Teleport all players to spawn after 3 seconds
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Player player : players) {
@@ -233,9 +246,6 @@ public class MatchManager {
         match.getParty().setInMatch(false);
         match.setState(Match.MatchState.FINISHED);
         
-        // Reset gamerule - DON'T set it to false, keep it as true
-        // match.getArena().getCenter().getWorld().setGameRuleValue("doImmediateRespawn", "false");
-        
         // Regenerate arena
         plugin.getArenaManager().pasteSchematic(match.getArena());
         
@@ -261,6 +271,11 @@ public class MatchManager {
             }
         }
         countdownTasks.clear();
+        
+        // Release all reserved arenas
+        for (Match match : activeMatches.values()) {
+            plugin.getArenaManager().releaseArena(match.getArena().getName());
+        }
         
         // Reset all players in match
         for (String matchId : activeMatches.keySet()) {

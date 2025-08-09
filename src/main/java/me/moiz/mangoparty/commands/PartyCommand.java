@@ -65,6 +65,7 @@ public class PartyCommand implements CommandExecutor {
                 handleDisbandCommand(player);
                 break;
             case "match":
+            case "fight":
                 handleMatchCommand(player);
                 break;
             case "info":
@@ -87,6 +88,7 @@ public class PartyCommand implements CommandExecutor {
         player.sendMessage("§e/party leave §7- Leave your current party");
         player.sendMessage("§e/party disband §7- Disband your party (leader only)");
         player.sendMessage("§e/party match §7- Start a match (leader only)");
+        player.sendMessage("§e/party fight §7- Start a match (leader only)");
         player.sendMessage("§e/party info §7- View party information");
     }
     

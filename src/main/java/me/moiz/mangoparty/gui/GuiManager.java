@@ -2,6 +2,7 @@ package me.moiz.mangoparty.gui;
 
 import me.moiz.mangoparty.MangoParty;
 import me.moiz.mangoparty.models.Kit;
+import me.moiz.mangoparty.models.Party;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -13,8 +14,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import me.moiz.mangoparty.models.Arena;
-import me.moiz.mangoparty.models.Party;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -60,29 +61,80 @@ public class GuiManager implements Listener {
     }
     
     public void openMatchTypeGui(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 9, "§6Select Match Type");
+        Inventory gui = Bukkit.createInventory(null, 18, "§6Select Match Type");
         
         // Party Split item
         ItemStack splitItem = new ItemStack(Material.IRON_SWORD);
         ItemMeta splitMeta = splitItem.getItemMeta();
         splitMeta.setDisplayName("§aParty Split");
         List<String> splitLore = new ArrayList<>();
-        splitLore.add("§7Divide your party into two teams");
-        splitLore.add("§7and fight against each other!");
+        splitLore.add("§7Divide party into teams");
         splitMeta.setLore(splitLore);
         splitItem.setItemMeta(splitMeta);
-        gui.setItem(3, splitItem);
+        gui.setItem(2, splitItem);
         
         // Party FFA item
         ItemStack ffaItem = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta ffaMeta = ffaItem.getItemMeta();
         ffaMeta.setDisplayName("§cParty FFA");
         List<String> ffaLore = new ArrayList<>();
-        ffaLore.add("§7Free for all battle!");
-        ffaLore.add("§7Last player standing wins!");
+        ffaLore.add("§7Free for all battle");
         ffaMeta.setLore(ffaLore);
         ffaItem.setItemMeta(ffaMeta);
-        gui.setItem(5, ffaItem);
+        gui.setItem(4, ffaItem);
+        
+        // Party vs Party item
+        ItemStack pvpItem = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta pvpMeta = pvpItem.getItemMeta();
+        pvpMeta.setDisplayName("§eParty vs Party");
+        List<String> pvpLore = new ArrayList<>();
+        pvpLore.add("§7Challenge another party");
+        pvpMeta.setLore(pvpLore);
+        pvpItem.setItemMeta(pvpMeta);
+        gui.setItem(6, pvpItem);
+        
+        player.openInventory(gui);
+    }
+    
+    public void openPartyDuelGui(Player player) {
+        Party playerParty = plugin.getPartyManager().getParty(player);
+        if (playerParty == null) {
+            player.sendMessage("§cYou are not in a party!");
+            return;
+        }
+        
+        Inventory gui = Bukkit.createInventory(null, 54, "§6Challenge Party");
+        
+        int slot = 0;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (slot >= 54) break;
+            
+            Party otherParty = plugin.getPartyManager().getParty(online);
+            if (otherParty != null && 
+                otherParty.isLeader(online.getUniqueId()) && 
+                !otherParty.equals(playerParty) &&
+                !otherParty.isInMatch()) {
+                
+                ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+                SkullMeta meta = (SkullMeta) head.getItemMeta();
+                meta.setOwningPlayer(online);
+                meta.setDisplayName("§e" + online.getName() + "'s Party");
+                
+                List<String> lore = new ArrayList<>();
+                lore.add("§7Members: §f" + otherParty.getSize());
+                for (Player member : otherParty.getOnlineMembers()) {
+                    if (lore.size() < 8) { // Limit lore size
+                        lore.add("§8• §7" + member.getName());
+                    }
+                }
+                lore.add("§aClick to challenge!");
+                meta.setLore(lore);
+                head.setItemMeta(meta);
+                
+                gui.setItem(slot, head);
+                slot++;
+            }
+        }
         
         player.openInventory(gui);
     }
@@ -149,6 +201,28 @@ public class GuiManager implements Listener {
             } else if (clicked.getType() == Material.DIAMOND_SWORD) {
                 // Party FFA selected
                 openKitGui(player, "ffa");
+            } else if (clicked.getType() == Material.PLAYER_HEAD) {
+                // Party vs Party selected
+                openPartyDuelGui(player);
+            }
+        } else if (title.equals("§6Challenge Party")) {
+            event.setCancelled(true);
+            
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || clicked.getType() != Material.PLAYER_HEAD) return;
+            
+            SkullMeta meta = (SkullMeta) clicked.getItemMeta();
+            if (meta.getOwningPlayer() != null) {
+                Player targetLeader = meta.getOwningPlayer().getPlayer();
+                if (targetLeader != null && targetLeader.isOnline()) {
+                    // Send duel request
+                    Party targetParty = plugin.getPartyManager().getParty(targetLeader);
+                    if (targetParty != null) {
+                        // For now, just open kit selection - you can expand this to add duel requests
+                        player.sendMessage("§aDuel feature coming soon! For now, use regular matches.");
+                        player.closeInventory();
+                    }
+                }
             }
         } else if (title.contains("Select Kit")) {
             event.setCancelled(true);
@@ -188,16 +262,10 @@ public class GuiManager implements Listener {
             return;
         }
         
-        // For now, use the first available arena (you could add arena selection GUI)
-        Map<String, Arena> arenas = plugin.getArenaManager().getArenas();
-        if (arenas.isEmpty()) {
-            player.sendMessage("§cNo arenas available! Contact an administrator.");
-            return;
-        }
-        
-        Arena arena = arenas.values().iterator().next();
-        if (!arena.isComplete()) {
-            player.sendMessage("§cSelected arena is not complete! Contact an administrator.");
+        // Get an available arena
+        Arena arena = plugin.getArenaManager().getAvailableArena();
+        if (arena == null) {
+            player.sendMessage("§cNo available arenas! All arenas are currently in use.");
             return;
         }
         

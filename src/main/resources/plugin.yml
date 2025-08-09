@@ -12,7 +12,7 @@ commands:
   party:
     description: Party management commands
     usage: /party <create|invite|join|transfer|leave|disband|match|info>
-    aliases: [p]
+    aliases: [p, par, part]
   mango:
     description: MangoParty admin commands
     usage: /mango <arena|create> [args...]

@@ -29,13 +29,24 @@ public class SpectatorListener implements Listener {
         Player damager = (Player) event.getDamager();
         Match match = plugin.getMatchManager().getPlayerMatch(damager);
         
-        if (match != null && match.isPlayerSpectator(damager.getUniqueId())) {
+        if (match == null) return;
+        
+        // Prevent damage during countdown or preparation
+        if (match.getState() == Match.MatchState.COUNTDOWN || 
+            match.getState() == Match.MatchState.PREPARING) {
             event.setCancelled(true);
             return;
         }
         
-        // Prevent friendly fire in split matches
-        if (match != null && "split".equalsIgnoreCase(match.getMatchType()) && 
+        // Prevent spectators from dealing damage
+        if (match.isPlayerSpectator(damager.getUniqueId())) {
+            event.setCancelled(true);
+            return;
+        }
+        
+        // Prevent friendly fire in split matches (without message)
+        if (match.getState() == Match.MatchState.ACTIVE && 
+            "split".equalsIgnoreCase(match.getMatchType()) && 
             event.getEntity() instanceof Player) {
             Player victim = (Player) event.getEntity();
             
@@ -46,8 +57,7 @@ public class SpectatorListener implements Listener {
                 
                 if (damagerTeam == victimTeam && damagerTeam > 0) {
                     event.setCancelled(true);
-                    damager.sendMessage("§cYou cannot damage your teammate!");
-                    return;
+                    return; // No message
                 }
             }
         }
@@ -60,8 +70,13 @@ public class SpectatorListener implements Listener {
         Player player = (Player) event.getEntity();
         Match match = plugin.getMatchManager().getPlayerMatch(player);
         
-        if (match != null && match.isPlayerSpectator(player.getUniqueId())) {
-            event.setCancelled(true);
+        if (match != null) {
+            // Prevent damage during countdown/preparation or if spectating
+            if (match.getState() == Match.MatchState.COUNTDOWN || 
+                match.getState() == Match.MatchState.PREPARING ||
+                match.isPlayerSpectator(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
         }
     }
     
@@ -123,7 +138,7 @@ public class SpectatorListener implements Listener {
         
         // Show to other players
         for (Player online : plugin.getServer().getOnlinePlayers()) {
-            if (!online.equals(player)) {
+            if (!online.equals(player) && online.isOnline()) {
                 online.showPlayer(plugin, player);
             }
         }
