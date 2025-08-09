@@ -25,11 +25,13 @@ public class PlayerRespawnListener implements Listener {
             return; // Player not in a match
         }
         
-        // If player is eliminated, they should respawn at their death location
+        // Cancel default respawn behavior for match players
+        event.setCancelled(true);
+        
+        // If player is eliminated, keep them at their death location
         if (match.isPlayerSpectator(player.getUniqueId())) {
-            // The death location teleport and spectator mode will be handled
-            // by the PlayerDeathListener after a 1-tick delay
-            event.setRespawnLocation(player.getLocation());
+            // Don't change respawn location - let them stay where they died
+            // The spectator setup will be handled by PlayerDeathListener
         }
     }
 }

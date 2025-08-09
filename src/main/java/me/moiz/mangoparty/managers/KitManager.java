@@ -90,7 +90,7 @@ public class KitManager {
             
             return kit;
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to load kit: " + name);
+            plugin.getLogger().warning("§c⚠️ Failed to load kit: " + name + " - " + e.getMessage());
             return null;
         }
     }
@@ -117,6 +117,7 @@ public class KitManager {
         
         kits.put(name, kit);
         saveKit(kit);
+        plugin.getLogger().info("§a⚔️ Created new kit: §e" + name + " §7by §e" + player.getName());
     }
     
     public void saveKit(Kit kit) {
@@ -156,7 +157,7 @@ public class KitManager {
         try {
             config.save(kitFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Failed to save kit: " + kit.getName());
+            plugin.getLogger().severe("§c❌ Failed to save kit: " + kit.getName() + " - " + e.getMessage());
         }
     }
     

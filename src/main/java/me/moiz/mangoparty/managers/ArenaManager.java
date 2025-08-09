@@ -86,7 +86,7 @@ public class ArenaManager {
             
             return arena;
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to load arena: " + name);
+            plugin.getLogger().warning("§c⚠️ Failed to load arena: " + name + " - " + e.getMessage());
             return null;
         }
     }
@@ -115,6 +115,7 @@ public class ArenaManager {
         Arena arena = new Arena(name, world);
         arenas.put(name, arena);
         saveArena(arena);
+        plugin.getLogger().info("§a🏟️ Created new arena: §e" + name);
         return arena;
     }
     
@@ -145,7 +146,7 @@ public class ArenaManager {
         try {
             arenasConfig.save(arenasFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Failed to save arenas.yml: " + e.getMessage());
+            plugin.getLogger().severe("§c❌ Failed to save arenas.yml: " + e.getMessage());
         }
     }
 
@@ -158,7 +159,7 @@ public class ArenaManager {
         try {
             arenasConfig.save(arenasFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Failed to save arenas.yml after deletion: " + e.getMessage());
+            plugin.getLogger().severe("§c❌ Failed to save arenas.yml after deletion: " + e.getMessage());
         }
 
         // Delete schematic file if it exists
@@ -167,6 +168,8 @@ public class ArenaManager {
         if (schematicFile.exists()) {
             schematicFile.delete();
         }
+        
+        plugin.getLogger().info("§c🗑️ Deleted arena: §e" + name);
     }
     
     public boolean saveSchematic(Arena arena) {
@@ -209,7 +212,7 @@ public class ArenaManager {
                     format = ClipboardFormats.findByAlias("schematic");
                 }
                 if (format == null) {
-                    plugin.getLogger().severe("No schematic format found! Make sure WorldEdit is properly installed.");
+                    plugin.getLogger().severe("§c❌ No schematic format found! Make sure WorldEdit is properly installed.");
                     return false;
                 }
 
@@ -218,9 +221,10 @@ public class ArenaManager {
                 }
             }
             
+            plugin.getLogger().info("§a💾 Saved schematic for arena: §e" + arena.getName());
             return true;
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to save schematic for arena " + arena.getName() + ": " + e.getMessage());
+            plugin.getLogger().severe("§c❌ Failed to save schematic for arena " + arena.getName() + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -232,7 +236,7 @@ public class ArenaManager {
             File schematicFile = new File(schematicsDir, arena.getName() + ".schem");
             
             if (!schematicFile.exists()) {
-                plugin.getLogger().warning("Schematic file not found: " + schematicFile.getPath());
+                plugin.getLogger().warning("§c⚠️ Schematic file not found: " + schematicFile.getPath());
                 return false;
             }
             
@@ -243,7 +247,7 @@ public class ArenaManager {
                 format = ClipboardFormats.findByAlias("schematic");
             }
             if (format == null) {
-                plugin.getLogger().severe("No schematic format found for reading!");
+                plugin.getLogger().severe("§c❌ No schematic format found for reading!");
                 return false;
             }
             
@@ -266,14 +270,12 @@ public class ArenaManager {
                         .build();
                 
                     Operations.complete(operation);
-                
-                    plugin.getLogger().info("Successfully pasted schematic for arena " + arena.getName() + " at " + pasteLocation);
                 }
             }
             
             return true;
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to paste schematic for arena " + arena.getName() + ": " + e.getMessage());
+            plugin.getLogger().severe("§c❌ Failed to paste schematic for arena " + arena.getName() + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }

@@ -33,6 +33,9 @@ public class PlayerDeathListener implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
         
+        // Store death location for spectator setup
+        Location deathLocation = player.getLocation().clone();
+        
         // Handle killer if exists
         Player killer = player.getKiller();
         if (killer != null && plugin.getMatchManager().isInMatch(killer)) {
@@ -53,11 +56,14 @@ public class PlayerDeathListener implements Listener {
             }
         }
         
-        // Schedule spectator setup after respawn
+        // Schedule spectator setup after respawn (longer delay to ensure respawn is processed)
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (player.isOnline()) {
+                    // Teleport back to death location first
+                    player.teleport(deathLocation);
+                    
                     // Clear inventory completely for spectators
                     player.getInventory().clear();
                     player.getInventory().setArmorContents(null);
@@ -76,14 +82,22 @@ public class PlayerDeathListener implements Listener {
                     }
                     
                     if (spectateTarget != null) {
-                        player.teleport(spectateTarget.getLocation());
-                        player.sendMessage("§7Now spectating §e" + spectateTarget.getName() + "§7. Use §e/spectate <player> §7to switch.");
+                        // Teleport to spectate target after a short delay
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                if (player.isOnline()) {
+                                    player.teleport(spectateTarget.getLocation());
+                                    player.sendMessage("§7Now spectating §e" + spectateTarget.getName() + "§7. Use §e/spectate <player> §7to switch.");
+                                }
+                            }
+                        }.runTaskLater(plugin, 10L); // 0.5 second delay
                     }
                     
                     // Update scoreboard
                     plugin.getScoreboardManager().updateMatchScoreboards(match);
                 }
             }
-        }.runTaskLater(plugin, 1L);
+        }.runTaskLater(plugin, 5L); // Increased delay to 5 ticks
     }
 }
