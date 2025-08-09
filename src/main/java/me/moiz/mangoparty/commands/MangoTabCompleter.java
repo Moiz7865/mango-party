@@ -30,7 +30,7 @@ public class MangoTabCompleter implements TabCompleter {
         
         if (args.length == 1) {
             // First argument: main commands
-            List<String> commands = Arrays.asList("arena", "create", "addkitgui");
+            List<String> commands = Arrays.asList("arena", "create", "addkitgui", "setspawn");
             return commands.stream()
                     .filter(cmd -> cmd.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
@@ -52,6 +52,11 @@ public class MangoTabCompleter implements TabCompleter {
             } else if (args[0].equalsIgnoreCase("addkitgui")) {
                 // Suggest existing kit names
                 return plugin.getKitManager().getKits().keySet().stream()
+                        .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+            } else if (args[0].equalsIgnoreCase("setspawn")) {
+                // Suggest existing arena names
+                return plugin.getArenaManager().getArenas().keySet().stream()
                         .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
             }

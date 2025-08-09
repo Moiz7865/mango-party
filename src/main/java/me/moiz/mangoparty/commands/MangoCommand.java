@@ -55,8 +55,9 @@ public class MangoCommand implements CommandExecutor {
                 return true;
             }
             handleAddKitGuiCommand(player, args);
-        }
-        else {
+        } else if (args[0].equalsIgnoreCase("setspawn")) {
+            handleSetSpawnCommand(player);
+        } else {
             sendHelpMessage(player);
         }
         
@@ -76,6 +77,7 @@ public class MangoCommand implements CommandExecutor {
         player.sendMessage("§e/mango arena delete <name> §7- Delete an arena");
         player.sendMessage("§e/mango create kit <name> §7- Create kit from inventory");
         player.sendMessage("§e/mango addkitgui <kit_name> <match_type> [slot] §7- Add a kit to a GUI");
+        player.sendMessage("§e/mango setspawn §7- Set the server spawn location");
     }
     
     private void sendArenaHelp(Player player) {
@@ -298,5 +300,10 @@ public class MangoCommand implements CommandExecutor {
         } else {
             player.sendMessage("§cFailed to add kit '" + kitName + "' to " + matchType.toUpperCase() + " GUI. It might already be there or an invalid slot was provided.");
         }
+    }
+
+    private void handleSetSpawnCommand(Player player) {
+        plugin.setSpawnLocation(player.getLocation());
+        player.sendMessage("§aSpawn location set to your current position!");
     }
 }

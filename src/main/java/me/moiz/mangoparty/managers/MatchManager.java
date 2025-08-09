@@ -115,11 +115,14 @@ public class MatchManager {
         List<Player> players = match.getAllPlayers();
         match.setState(Match.MatchState.COUNTDOWN);
         
-        // Prepare players for countdown
+        // Give kits BEFORE countdown starts
         for (Player player : players) {
             player.setGameMode(GameMode.ADVENTURE);
             player.setWalkSpeed(0f);
             player.setFlySpeed(0f);
+            
+            // Give kit immediately
+            plugin.getKitManager().giveKit(player, match.getKit());
         }
         
         // Start scoreboards
@@ -144,14 +147,19 @@ public class MatchManager {
                     match.setState(Match.MatchState.ACTIVE);
                     for (Player player : players) {
                         if (player.isOnline()) {
+                            // Clear title and show GO message briefly
                             player.sendTitle("§aGO!", "§7Fight!", 0, 20, 10);
                             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
                             player.setGameMode(GameMode.SURVIVAL);
                             player.setWalkSpeed(0.2f);
                             player.setFlySpeed(0.1f);
                             
-                            // Give kit
-                            plugin.getKitManager().giveKit(player, match.getKit());
+                            // Clear title after 1 second
+                            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                if (player.isOnline()) {
+                                    player.sendTitle("", "", 0, 0, 0);
+                                }
+                            }, 20L);
                         }
                     }
                     
@@ -192,19 +200,29 @@ public class MatchManager {
             }
         }
         
-        // Clean up players
-        for (Player player : players) {
-            playerMatches.remove(player.getUniqueId());
-            
-            // Reset player state
-            player.setGameMode(GameMode.SURVIVAL);
-            player.setWalkSpeed(0.2f);
-            player.setFlySpeed(0.1f);
-            player.getInventory().clear();
-            
-            // Remove scoreboard
-            plugin.getScoreboardManager().removeScoreboard(player);
-        }
+        // Teleport all players to spawn after 3 seconds
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (Player player : players) {
+                playerMatches.remove(player.getUniqueId());
+                
+                // Reset player state
+                player.setGameMode(GameMode.SURVIVAL);
+                player.setWalkSpeed(0.2f);
+                player.setFlySpeed(0.1f);
+                player.getInventory().clear();
+                
+                // Teleport to spawn
+                if (plugin.getSpawnLocation() != null) {
+                    player.teleport(plugin.getSpawnLocation());
+                }
+                
+                // Remove scoreboard
+                plugin.getScoreboardManager().removeScoreboard(player);
+                
+                // Clear any remaining titles
+                player.sendTitle("", "", 0, 0, 0);
+            }
+        }, 60L); // 3 seconds delay
         
         // Set party as not in match
         match.getParty().setInMatch(false);

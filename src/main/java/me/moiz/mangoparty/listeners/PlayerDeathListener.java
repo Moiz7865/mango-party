@@ -33,9 +33,6 @@ public class PlayerDeathListener implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
         
-        // Store death location
-        Location deathLocation = player.getLocation().clone();
-        
         // Handle killer if exists
         Player killer = player.getKiller();
         if (killer != null && plugin.getMatchManager().isInMatch(killer)) {
@@ -61,17 +58,28 @@ public class PlayerDeathListener implements Listener {
             @Override
             public void run() {
                 if (player.isOnline()) {
-                    // Teleport to death location and set spectator mode
-                    player.teleport(deathLocation);
+                    // Set spectator mode
                     player.setGameMode(GameMode.SPECTATOR);
                     player.getInventory().clear();
                     
+                    // Find a living teammate or opponent to spectate
+                    Player spectateTarget = null;
+                    for (Player alive : match.getAllPlayers()) {
+                        if (match.isPlayerAlive(alive.getUniqueId()) && alive.isOnline()) {
+                            spectateTarget = alive;
+                            break;
+                        }
+                    }
+                    
+                    if (spectateTarget != null) {
+                        player.teleport(spectateTarget.getLocation());
+                        player.sendMessage("§7Now spectating §e" + spectateTarget.getName() + "§7. Use §e/spectate <player> §7to switch.");
+                    }
+                    
                     // Update scoreboard
                     plugin.getScoreboardManager().updateMatchScoreboards(match);
-                    
-                    player.sendMessage("§7You are now spectating. Use §e/spectate <player> §7to follow other players.");
                 }
             }
-        }.runTaskLater(plugin, 1L); // Run after 1 tick to ensure respawn is processed
+        }.runTaskLater(plugin, 1L);
     }
 }

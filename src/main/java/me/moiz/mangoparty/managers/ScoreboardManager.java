@@ -61,7 +61,11 @@ public class ScoreboardManager {
             for (String line : configLines) {
                 String processedLine = processPlaceholders(line, match, player);
                 processedLine = HexUtils.colorize(processedLine);
-                lines.add(processedLine);
+                
+                // Skip empty lines and limit to 15 lines max
+                if (!processedLine.trim().isEmpty() && lines.size() < 15) {
+                    lines.add(processedLine);
+                }
             }
             
             board.updateLines(lines);

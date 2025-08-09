@@ -15,6 +15,8 @@ import me.moiz.mangoparty.managers.KitManager;
 import me.moiz.mangoparty.managers.MatchManager;
 import me.moiz.mangoparty.managers.PartyManager;
 import me.moiz.mangoparty.managers.ScoreboardManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MangoParty extends JavaPlugin {
@@ -27,6 +29,7 @@ public class MangoParty extends JavaPlugin {
     private GuiManager guiManager;
     private ConfigManager configManager;
     private ScoreboardManager scoreboardManager;
+    private Location spawnLocation;
     
     @Override
     public void onEnable() {
@@ -35,6 +38,9 @@ public class MangoParty extends JavaPlugin {
         // Initialize configuration
         configManager = new ConfigManager(this);
         configManager.loadConfigs();
+        
+        // Load spawn location
+        loadSpawnLocation();
         
         // Initialize managers
         partyManager = new PartyManager();
@@ -108,5 +114,37 @@ public class MangoParty extends JavaPlugin {
     
     public ScoreboardManager getScoreboardManager() {
         return scoreboardManager;
+    }
+    
+    public Location getSpawnLocation() {
+        return spawnLocation;
+    }
+    
+    public void setSpawnLocation(Location location) {
+        this.spawnLocation = location;
+        // Save to config
+        getConfig().set("spawn.world", location.getWorld().getName());
+        getConfig().set("spawn.x", location.getX());
+        getConfig().set("spawn.y", location.getY());
+        getConfig().set("spawn.z", location.getZ());
+        getConfig().set("spawn.yaw", location.getYaw());
+        getConfig().set("spawn.pitch", location.getPitch());
+        saveConfig();
+    }
+    
+    private void loadSpawnLocation() {
+        if (getConfig().contains("spawn")) {
+            String worldName = getConfig().getString("spawn.world");
+            if (worldName != null && Bukkit.getWorld(worldName) != null) {
+                spawnLocation = new Location(
+                    Bukkit.getWorld(worldName),
+                    getConfig().getDouble("spawn.x"),
+                    getConfig().getDouble("spawn.y"),
+                    getConfig().getDouble("spawn.z"),
+                    (float) getConfig().getDouble("spawn.yaw"),
+                    (float) getConfig().getDouble("spawn.pitch")
+                );
+            }
+        }
     }
 }

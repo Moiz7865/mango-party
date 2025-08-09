@@ -245,13 +245,22 @@ public class ArenaManager {
                 plugin.getLogger().severe("No schematic format found for reading!");
                 return false;
             }
+            
             try (ClipboardReader reader = format.getReader(new FileInputStream(schematicFile))) {
                 Clipboard clipboard = reader.read();
                 
                 try (EditSession editSession = WorldEdit.getInstance().newEditSession(world)) {
+                    // Use the clipboard's origin for proper positioning
+                    BlockVector3 pasteLocation = BlockVector3.at(
+                        arena.getCenter().getBlockX(), 
+                        arena.getCenter().getBlockY(), 
+                        arena.getCenter().getBlockZ()
+                    );
+                    
                     Operation operation = new ClipboardHolder(clipboard)
                         .createPaste(editSession)
-                        .to(BlockVector3.at(arena.getCenter().getBlockX(), arena.getCenter().getBlockY(), arena.getCenter().getBlockZ()))
+                        .to(pasteLocation)
+                        .ignoreAirBlocks(false)
                         .build();
                     
                     Operations.complete(operation);
