@@ -1,0 +1,110 @@
+package me.moiz.mangoparty.listeners;
+
+import me.moiz.mangoparty.MangoParty;
+import me.moiz.mangoparty.models.Match;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+public class SpectatorListener implements Listener {
+    private MangoParty plugin;
+    
+    public SpectatorListener(MangoParty plugin) {
+        this.plugin = plugin;
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player)) return;
+        
+        Player damager = (Player) event.getDamager();
+        Match match = plugin.getMatchManager().getPlayerMatch(damager);
+        
+        if (match != null && match.isPlayerSpectator(damager.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        
+        Player player = (Player) event.getEntity();
+        Match match = plugin.getMatchManager().getPlayerMatch(player);
+        
+        if (match != null && match.isPlayerSpectator(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Match match = plugin.getMatchManager().getPlayerMatch(player);
+        
+        if (match != null && match.isPlayerSpectator(player.getUniqueId())) {
+            // Allow spectators to interact but prevent block changes
+            if (event.getClickedBlock() != null) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        Match match = plugin.getMatchManager().getPlayerMatch(player);
+        
+        if (match != null && match.isPlayerSpectator(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityTarget(EntityTargetEvent event) {
+        if (!(event.getTarget() instanceof Player)) return;
+        
+        Player player = (Player) event.getTarget();
+        Match match = plugin.getMatchManager().getPlayerMatch(player);
+        
+        if (match != null && match.isPlayerSpectator(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    public void makeSpectator(Player player) {
+        // Make invisible to other players but keep in survival
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        
+        // Hide from other players
+        for (Player online : plugin.getServer().getOnlinePlayers()) {
+            if (!online.equals(player)) {
+                online.hidePlayer(plugin, player);
+            }
+        }
+    }
+    
+    public void resetSpectator(Player player) {
+        // Remove invisibility and flight
+        player.removePotionEffect(PotionEffectType.INVISIBILITY);
+        player.setAllowFlight(false);
+        player.setFlying(false);
+        
+        // Show to other players
+        for (Player online : plugin.getServer().getOnlinePlayers()) {
+            if (!online.equals(player)) {
+                online.showPlayer(plugin, player);
+            }
+        }
+    }
+}

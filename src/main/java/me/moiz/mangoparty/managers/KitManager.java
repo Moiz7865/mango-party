@@ -2,6 +2,8 @@ package me.moiz.mangoparty.managers;
 
 import me.moiz.mangoparty.MangoParty;
 import me.moiz.mangoparty.models.Kit;
+import me.moiz.mangoparty.models.KitRules;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -72,6 +74,20 @@ public class KitManager {
                 kit.setIcon(config.getItemStack("icon"));
             }
             
+            // Load kit rules
+            if (config.contains("rules")) {
+                ConfigurationSection rulesSection = config.getConfigurationSection("rules");
+                KitRules rules = new KitRules();
+                
+                rules.setNaturalHealthRegen(rulesSection.getBoolean("natural_health_regen", true));
+                rules.setBlockBreak(rulesSection.getBoolean("block_break", false));
+                rules.setBlockPlace(rulesSection.getBoolean("block_place", false));
+                rules.setDamageMultiplier(rulesSection.getDouble("damage_multiplier", 1.0));
+                rules.setInstantTnt(rulesSection.getBoolean("instant_tnt", false));
+                
+                kit.setRules(rules);
+            }
+            
             return kit;
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to load kit: " + name);
@@ -103,7 +119,7 @@ public class KitManager {
         saveKit(kit);
     }
     
-    private void saveKit(Kit kit) {
+    public void saveKit(Kit kit) {
         File kitFile = new File(kitsDir, kit.getName() + ".yml");
         YamlConfiguration config = new YamlConfiguration();
         
@@ -128,6 +144,14 @@ public class KitManager {
         if (kit.getIcon() != null) {
             config.set("icon", kit.getIcon());
         }
+        
+        // Save kit rules
+        KitRules rules = kit.getRules();
+        config.set("rules.natural_health_regen", rules.isNaturalHealthRegen());
+        config.set("rules.block_break", rules.isBlockBreak());
+        config.set("rules.block_place", rules.isBlockPlace());
+        config.set("rules.damage_multiplier", rules.getDamageMultiplier());
+        config.set("rules.instant_tnt", rules.isInstantTnt());
         
         try {
             config.save(kitFile);

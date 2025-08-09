@@ -8,10 +8,12 @@ public class Kit {
     private ItemStack[] contents;
     private ItemStack[] armor;
     private ItemStack icon;
+    private KitRules rules;
     
     public Kit(String name) {
         this.name = name;
         this.displayName = name;
+        this.rules = new KitRules();
     }
     
     public String getName() {
@@ -48,5 +50,13 @@ public class Kit {
     
     public void setIcon(ItemStack icon) {
         this.icon = icon;
+    }
+    
+    public KitRules getRules() {
+        return rules;
+    }
+    
+    public void setRules(KitRules rules) {
+        this.rules = rules;
     }
 }

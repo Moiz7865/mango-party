@@ -205,6 +205,11 @@ public class MatchManager {
             for (Player player : players) {
                 playerMatches.remove(player.getUniqueId());
                 
+                // Reset spectator if they were spectating
+                if (match.isPlayerSpectator(player.getUniqueId())) {
+                    plugin.getSpectatorListener().resetSpectator(player);
+                }
+                
                 // Reset player state
                 player.setGameMode(GameMode.SURVIVAL);
                 player.setWalkSpeed(0.2f);
@@ -263,6 +268,8 @@ public class MatchManager {
             for (UUID uuid : match.getAllPlayersUUIDs()) {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null && player.isOnline()) {
+                    // Reset spectator state
+                    plugin.getSpectatorListener().resetSpectator(player);
                     player.setGameMode(GameMode.SURVIVAL);
                     player.setWalkSpeed(0.2f);
                     player.setFlySpeed(0.1f);

@@ -42,7 +42,22 @@ public class MangoCommand implements CommandExecutor {
                 return true;
             }
             
+            if (args[1].equalsIgnoreCase("editor")) {
+                plugin.getArenaEditorGui().openArenaListGui(player);
+                return true;
+            }
+            
             handleArenaCommand(player, args);
+        } else if (args[0].equalsIgnoreCase("kit")) {
+            if (args.length < 2) {
+                sendKitHelp(player);
+                return true;
+            }
+            
+            if (args[1].equalsIgnoreCase("editor")) {
+                plugin.getKitEditorGui().openKitListGui(player);
+                return true;
+            }
         } else if (args[0].equalsIgnoreCase("create") && args.length > 1 && args[1].equalsIgnoreCase("kit")) {
             if (args.length < 3) {
                 player.sendMessage("§cUsage: /mango create kit <name>");
@@ -66,6 +81,8 @@ public class MangoCommand implements CommandExecutor {
     
     private void sendHelpMessage(Player player) {
         player.sendMessage("§6=== MangoParty Admin Commands ===");
+        player.sendMessage("§e/mango arena editor §7- Open arena editor GUI");
+        player.sendMessage("§e/mango kit editor §7- Open kit editor GUI");
         player.sendMessage("§e/mango arena create <name> §7- Create a new arena");
         player.sendMessage("§e/mango arena corner1 <name> §7- Set arena corner 1");
         player.sendMessage("§e/mango arena corner2 <name> §7- Set arena corner 2");
@@ -82,6 +99,7 @@ public class MangoCommand implements CommandExecutor {
     
     private void sendArenaHelp(Player player) {
         player.sendMessage("§6=== Arena Commands ===");
+        player.sendMessage("§e/mango arena editor §7- Open arena editor GUI");
         player.sendMessage("§e/mango arena create <name> §7- Create a new arena");
         player.sendMessage("§e/mango arena corner1 <name> §7- Set arena corner 1");
         player.sendMessage("§e/mango arena corner2 <name> §7- Set arena corner 2");
@@ -91,6 +109,11 @@ public class MangoCommand implements CommandExecutor {
         player.sendMessage("§e/mango arena save <name> §7- Save arena schematic");
         player.sendMessage("§e/mango arena list §7- List all arenas");
         player.sendMessage("§e/mango arena delete <name> §7- Delete an arena");
+    }
+    
+    private void sendKitHelp(Player player) {
+        player.sendMessage("§6=== Kit Commands ===");
+        player.sendMessage("§e/mango kit editor §7- Open kit editor GUI");
     }
     
     private void handleArenaCommand(Player player, String[] args) {

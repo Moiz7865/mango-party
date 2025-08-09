@@ -58,9 +58,8 @@ public class PlayerDeathListener implements Listener {
             @Override
             public void run() {
                 if (player.isOnline()) {
-                    // Set spectator mode
-                    player.setGameMode(GameMode.SPECTATOR);
-                    player.getInventory().clear();
+                    // Make player spectator using new system
+                    plugin.getSpectatorListener().makeSpectator(player);
                     
                     // Find a living teammate or opponent to spectate
                     Player spectateTarget = null;
