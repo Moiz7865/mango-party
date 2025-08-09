@@ -15,6 +15,7 @@ import me.moiz.mangoparty.listeners.PlayerRespawnListener;
 import me.moiz.mangoparty.listeners.KitRulesListener;
 import me.moiz.mangoparty.listeners.SpectatorListener;
 import me.moiz.mangoparty.listeners.PlayerConnectionListener;
+import me.moiz.mangoparty.listeners.ArenaBoundsListener;
 import me.moiz.mangoparty.managers.ArenaManager;
 import me.moiz.mangoparty.managers.KitManager;
 import me.moiz.mangoparty.managers.MatchManager;
@@ -37,6 +38,7 @@ public class MangoParty extends JavaPlugin {
     private ArenaEditorGui arenaEditorGui;
     private KitEditorGui kitEditorGui;
     private SpectatorListener spectatorListener;
+    private ArenaBoundsListener arenaBoundsListener;
     private Location spawnLocation;
     
     @Override
@@ -66,6 +68,9 @@ public class MangoParty extends JavaPlugin {
         
         // Initialize spectator listener
         spectatorListener = new SpectatorListener(this);
+        
+        // Initialize arena bounds listener
+        arenaBoundsListener = new ArenaBoundsListener(this);
 
         // Register event listeners
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
@@ -73,6 +78,7 @@ public class MangoParty extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new KitRulesListener(this), this);
         getServer().getPluginManager().registerEvents(spectatorListener, this);
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(this), this);
+        getServer().getPluginManager().registerEvents(arenaBoundsListener, this);
         
         // Register commands with tab completers
         getCommand("party").setExecutor(new PartyCommand(this));
@@ -144,6 +150,10 @@ public class MangoParty extends JavaPlugin {
     
     public SpectatorListener getSpectatorListener() {
         return spectatorListener;
+    }
+    
+    public ArenaBoundsListener getArenaBoundsListener() {
+        return arenaBoundsListener;
     }
     
     public Location getSpawnLocation() {

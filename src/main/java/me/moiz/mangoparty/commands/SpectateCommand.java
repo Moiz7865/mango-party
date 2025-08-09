@@ -60,7 +60,9 @@ public class SpectateCommand implements CommandExecutor {
         
         // Teleport to target
         player.teleport(target.getLocation());
-        player.setGameMode(GameMode.SPECTATOR);
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(true);
+        player.setFlying(true);
         player.sendMessage("§aNow spectating " + target.getName());
         
         return true;

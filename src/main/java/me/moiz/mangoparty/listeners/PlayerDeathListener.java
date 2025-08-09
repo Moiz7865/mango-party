@@ -58,6 +58,11 @@ public class PlayerDeathListener implements Listener {
             @Override
             public void run() {
                 if (player.isOnline()) {
+                    // Clear inventory completely for spectators
+                    player.getInventory().clear();
+                    player.getInventory().setArmorContents(null);
+                    player.updateInventory();
+                    
                     // Make player spectator using new system
                     plugin.getSpectatorListener().makeSpectator(player);
                     

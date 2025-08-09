@@ -2,6 +2,7 @@ package me.moiz.mangoparty.listeners;
 
 import me.moiz.mangoparty.MangoParty;
 import me.moiz.mangoparty.models.Match;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,6 +31,25 @@ public class SpectatorListener implements Listener {
         
         if (match != null && match.isPlayerSpectator(damager.getUniqueId())) {
             event.setCancelled(true);
+            return;
+        }
+        
+        // Prevent friendly fire in split matches
+        if (match != null && "split".equalsIgnoreCase(match.getMatchType()) && 
+            event.getEntity() instanceof Player) {
+            Player victim = (Player) event.getEntity();
+            
+            // Check if both players are in the same match and same team
+            if (plugin.getMatchManager().isInMatch(victim)) {
+                int damagerTeam = match.getPlayerTeam(damager.getUniqueId());
+                int victimTeam = match.getPlayerTeam(victim.getUniqueId());
+                
+                if (damagerTeam == victimTeam && damagerTeam > 0) {
+                    event.setCancelled(true);
+                    damager.sendMessage("§cYou cannot damage your teammate!");
+                    return;
+                }
+            }
         }
     }
     
@@ -81,7 +101,8 @@ public class SpectatorListener implements Listener {
     }
     
     public void makeSpectator(Player player) {
-        // Make invisible to other players but keep in survival
+        // Set to survival mode but make invisible and allow flight
+        player.setGameMode(GameMode.SURVIVAL);
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
         player.setAllowFlight(true);
         player.setFlying(true);

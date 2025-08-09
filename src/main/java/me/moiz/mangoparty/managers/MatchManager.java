@@ -71,7 +71,7 @@ public class MatchManager {
             playerMatches.put(player.getUniqueId(), matchId);
         }
         
-        // Set gamerule for immediate respawn
+        // Set gamerule for immediate respawn and keep it true
         arena.getCenter().getWorld().setGameRuleValue("doImmediateRespawn", "true");
         
         // Regenerate arena
@@ -233,8 +233,8 @@ public class MatchManager {
         match.getParty().setInMatch(false);
         match.setState(Match.MatchState.FINISHED);
         
-        // Reset gamerule
-        match.getArena().getCenter().getWorld().setGameRuleValue("doImmediateRespawn", "false");
+        // Reset gamerule - DON'T set it to false, keep it as true
+        // match.getArena().getCenter().getWorld().setGameRuleValue("doImmediateRespawn", "false");
         
         // Regenerate arena
         plugin.getArenaManager().pasteSchematic(match.getArena());
